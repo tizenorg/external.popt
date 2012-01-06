@@ -1,0 +1,18 @@
+Source: popt
+Section: misc
+Priority: extra
+Maintainer: Mike McCormack <mj.mccormack@samsung.com>
+Build-Depends: debhelper (>= 5)
+Standards-Version: 1.7
+
+Package: popt-dev
+Section: misc
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, popt
+Description: Parsing Command line options (Development Package)
+
+Package: popt
+Section: misc
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Parsing Command line options

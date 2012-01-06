@@ -1,0 +1,2 @@
+@PREFIX@/lib/libpopt.so*
+@PREFIX@/share/locale/*
