@@ -1,116 +1,147 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR Free Software Foundation, Inc.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# translation of popt-1.14.pot to Finnish
+# Copyright © 2008 Free Software Foundation, Inc.
+# This file is distributed under the same license as the popt package.
+# This file is put in the public domain.
+# Jorma Karvonen <karvjorm@users.sf.net>, 2008.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: popt 1.6.3\n"
-"POT-Creation-Date: 2002-09-16 13:31-0400\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Project-Id-Version: popt 1.14\n"
+"Report-Msgid-Bugs-To: <popt-devel@rpm5.org>\n"
+"POT-Creation-Date: 2010-02-17 13:35-0500\n"
+"PO-Revision-Date: 2008-02-21 18:19+0200\n"
+"Last-Translator: Jorma Karvonen <karvjorm@users.sf.net>\n"
+"Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
-"Content-Transfer-Encoding: ENCODING\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: KBabel 1.11.4\n"
 
-#: popt.c:34
+#  errno - number of last error (defined by the ISO C standard)
+#: popt.c:47
 msgid "unknown errno"
-msgstr ""
+msgstr "tuntematon errno-virhenumeroarvo"
 
-#: popt.c:940
+#: popt.c:1290
 #, c-format
-msgid "option type (%d) not implemented in popt\n"
-msgstr ""
+msgid "option type (%u) not implemented in popt\n"
+msgstr "valitsintyyppiä (%u) ei ole toteutettu popt-ohjelmassa\n"
 
-#: popt.c:1160
+#: popt.c:1711
 msgid "missing argument"
-msgstr ""
+msgstr "puuttuva argumentti"
 
-#: popt.c:1162
+#: popt.c:1713
 msgid "unknown option"
-msgstr ""
+msgstr "tuntematon valitsin"
 
-#: popt.c:1164
+#: popt.c:1715
 msgid "mutually exclusive logical operations requested"
-msgstr ""
+msgstr "pyydettyjä loogisia toimintoja ei voi käyttää yhdessä"
 
-#: popt.c:1166
+#: popt.c:1717
 msgid "opt->arg should not be NULL"
-msgstr ""
+msgstr "”opt->arg”-valitsinargumentti ei saa olla NULL"
 
-#: popt.c:1168
+#: popt.c:1719
 msgid "aliases nested too deeply"
-msgstr ""
+msgstr "liian monta aliasta sisäkkäin"
 
-#: popt.c:1170
+#: popt.c:1721
 msgid "error in parameter quoting"
-msgstr ""
+msgstr "virhe parametrien lainauksessa"
 
-#: popt.c:1172
+#: popt.c:1723
 msgid "invalid numeric value"
-msgstr ""
+msgstr "virheellinen numeroarvo"
 
-#: popt.c:1174
+#: popt.c:1725
 msgid "number too large or too small"
-msgstr ""
+msgstr "numero on liian iso tai liian pieni"
 
-#: popt.c:1176
+#: popt.c:1727
 msgid "memory allocation failed"
+msgstr "muistin varaus ei onnistunut"
+
+#: popt.c:1729
+msgid "config file failed sanity test"
 msgstr ""
 
-#: popt.c:1180
+#: popt.c:1733
 msgid "unknown error"
-msgstr ""
+msgstr "tuntematon virhe"
 
-#: popthelp.c:57
+#: popthelp.c:75 popthelp.c:86
 msgid "Show this help message"
-msgstr ""
+msgstr "Näytä tämä ohje"
 
-#: popthelp.c:58
+#: popthelp.c:76 popthelp.c:87
 msgid "Display brief usage message"
-msgstr ""
+msgstr "Näytä lyhyt käyttöohje"
 
-#: popthelp.c:61
+#: popthelp.c:90
 msgid "Display option defaults in message"
-msgstr ""
+msgstr "Näytä valitsinoletukset ohjeessa"
 
-#: popthelp.c:103
+#: popthelp.c:92
+msgid "Terminate options"
+msgstr "Lopettamisvalitsimet"
+
+#: popthelp.c:191
+msgid "Help options:"
+msgstr "Ohjevalitsimet:"
+
+#: popthelp.c:192
+msgid "Options implemented via popt alias/exec:"
+msgstr ""
+"Valitsimet toteutettu ”popt alias”-määrittelyillä tai ”popt exec”-"
+"määrittelyillä:"
+
+#: popthelp.c:200
 msgid "NONE"
-msgstr ""
+msgstr "EI MITÄÄN"
 
-#: popthelp.c:105
+#: popthelp.c:202
 msgid "VAL"
-msgstr ""
+msgstr "ARVO"
 
-#: popthelp.c:109
+#: popthelp.c:206
 msgid "INT"
+msgstr "INT-KOKONAISLUKU"
+
+#: popthelp.c:207
+msgid "SHORT"
 msgstr ""
 
-#: popthelp.c:110
+#: popthelp.c:208
 msgid "LONG"
-msgstr ""
+msgstr "LONG-KOKONAISLUKU"
 
-#: popthelp.c:111
+#: popthelp.c:209
+msgid "LONGLONG"
+msgstr "LONGLONG-KOKONAISLUKU"
+
+#: popthelp.c:210
 msgid "STRING"
-msgstr ""
+msgstr "MERKKIJONO"
 
-#: popthelp.c:112
+#: popthelp.c:211
 msgid "FLOAT"
-msgstr ""
+msgstr "FLOAT-LIUKULUKU"
 
-#: popthelp.c:113
+#: popthelp.c:212
 msgid "DOUBLE"
-msgstr ""
+msgstr "DOUBLE-LIUKULUKU"
 
-#: popthelp.c:114
+#: popthelp.c:215
 msgid "ARG"
-msgstr ""
+msgstr "ARGUMENTTI"
 
-#: popthelp.c:486
+#: popthelp.c:649
 msgid "Usage:"
-msgstr ""
+msgstr "Käyttö:"
 
-#: popthelp.c:510
+#: popthelp.c:672
 msgid "[OPTION...]"
-msgstr ""
+msgstr "[VALITSIN...]"
