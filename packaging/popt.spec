@@ -6,6 +6,7 @@ Group:      System/Libraries
 License:    MIT
 URL:        http://www.rpm5.org/
 Source0:    http://www.rpm5.org/files/%{name}/%{name}-%{version}.tar.gz
+Source1001: packaging/popt.manifest 
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 
@@ -38,6 +39,7 @@ API documentation of the popt library, too.
 %setup -q -n %{name}-%{version}
 
 %build
+cp %{SOURCE1001} .
 
 %configure --disable-static \
     --libdir=/%{_lib} \
@@ -66,6 +68,7 @@ mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/popt.d
 
 
 %files
+%manifest popt.manifest
 %defattr(-,root,root,-)
 %doc COPYING
 %{_sysconfdir}/popt.d
@@ -73,6 +76,7 @@ mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/popt.d
 
 
 %files devel
+%manifest popt.manifest
 %defattr(-,root,root,-)
 %doc README
 #%doc doxygen/html
