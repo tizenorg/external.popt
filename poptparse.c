@@ -10,7 +10,6 @@
 
 #define POPT_ARGV_ARRAY_GROW_DELTA 5
 
-/*@-boundswrite@*/
 int poptDupArgv(int argc, const char **argv,
 		int * argcPtr, const char *** argvPtr)
 {
@@ -32,13 +31,13 @@ int poptDupArgv(int argc, const char **argv,
 	return POPT_ERROR_MALLOC;
     argv2 = (void *) dst;
     dst += (argc + 1) * sizeof(*argv);
+    *dst = '\0';
 
-    /*@-branchstate@*/
     for (i = 0; i < argc; i++) {
 	argv2[i] = dst;
-	dst += strlen(strcpy(dst, argv[i])) + 1;
+	dst = stpcpy(dst, argv[i]);
+	dst++;	/* trailing NUL */
     }
-    /*@=branchstate@*/
     argv2[argc] = NULL;
 
     if (argvPtr) {
@@ -51,9 +50,7 @@ int poptDupArgv(int argc, const char **argv,
 	*argcPtr = argc;
     return 0;
 }
-/*@=boundswrite@*/
 
-/*@-bounds@*/
 int poptParseArgvString(const char * s, int * argcPtr, const char *** argvPtr)
 {
     const char * src;
@@ -61,11 +58,16 @@ int poptParseArgvString(const char * s, int * argcPtr, const char *** argvPtr)
     int argvAlloced = POPT_ARGV_ARRAY_GROW_DELTA;
     const char ** argv = malloc(sizeof(*argv) * argvAlloced);
     int argc = 0;
-    int buflen = strlen(s) + 1;
-    char * buf = memset(alloca(buflen), 0, buflen);
+    size_t buflen = strlen(s) + 1;
+    char * buf, * bufOrig = NULL;
     int rc = POPT_ERROR_MALLOC;
 
     if (argv == NULL) return rc;
+    buf = bufOrig = calloc((size_t)1, buflen);
+    if (buf == NULL) {
+	free(argv);
+	return rc;
+    }
     argv[argc] = buf;
 
     for (src = s; *src != '\0'; src++) {
@@ -81,7 +83,7 @@ int poptParseArgvString(const char * s, int * argcPtr, const char *** argvPtr)
 		if (*src != quote) *buf++ = '\\';
 	    }
 	    *buf++ = *src;
-	} else if (isspace(*src)) {
+	} else if (_isspaceptr(src)) {
 	    if (*argv[argc] != '\0') {
 		buf++, argc++;
 		if (argc == argvAlloced) {
@@ -116,29 +118,29 @@ int poptParseArgvString(const char * s, int * argcPtr, const char *** argvPtr)
     rc = poptDupArgv(argc, argv, argcPtr, argvPtr);
 
 exit:
+    if (bufOrig) free(bufOrig);
     if (argv) free(argv);
     return rc;
 }
-/*@=bounds@*/
 
 /* still in the dev stage.
  * return values, perhaps 1== file erro
  * 2== line to long
  * 3== umm.... more?
  */
-int poptConfigFileToString(FILE *fp, char ** argstrp, /*@unused@*/ int flags)
+int poptConfigFileToString(FILE *fp, char ** argstrp,
+		/*@unused@*/ UNUSED(int flags))
 {
     char line[999];
     char * argstr;
     char * p;
     char * q;
     char * x;
-    int t;
-    int argvlen = 0;
+    size_t t;
+    size_t argvlen = 0;
     size_t maxlinelen = sizeof(line);
     size_t linelen;
-    int maxargvlen = 480;
-    int linenum = 0;
+    size_t maxargvlen = (size_t)480;
 
     *argstrp = NULL;
 
@@ -153,34 +155,35 @@ int poptConfigFileToString(FILE *fp, char ** argstrp, /*@unused@*/ int flags)
     if (argstr == NULL) return POPT_ERROR_MALLOC;
 
     while (fgets(line, (int)maxlinelen, fp) != NULL) {
-	linenum++;
 	p = line;
 
 	/* loop until first non-space char or EOL */
-	while( *p != '\0' && isspace(*p) )
+	while( *p != '\0' && _isspaceptr(p) )
 	    p++;
 
 	linelen = strlen(p);
-	if (linelen >= maxlinelen-1)
+	if (linelen >= maxlinelen-1) {
+	    free(argstr);
 	    return POPT_ERROR_OVERFLOW;	/* XXX line too long */
+	}
 
 	if (*p == '\0' || *p == '\n') continue;	/* line is empty */
 	if (*p == '#') continue;		/* comment line */
 
 	q = p;
 
-	while (*q != '\0' && (!isspace(*q)) && *q != '=')
+	while (*q != '\0' && (!_isspaceptr(q)) && *q != '=')
 	    q++;
 
-	if (isspace(*q)) {
+	if (_isspaceptr(q)) {
 	    /* a space after the name, find next non space */
 	    *q++='\0';
-	    while( *q != '\0' && isspace((int)*q) ) q++;
+	    while( *q != '\0' && _isspaceptr(q) ) q++;
 	}
 	if (*q == '\0') {
 	    /* single command line option (ie, no name=val, just name) */
 	    q[-1] = '\0';		/* kill off newline from fgets() call */
-	    argvlen += (t = q - p) + (sizeof(" --")-1);
+	    argvlen += (t = (size_t)(q - p)) + (sizeof(" --")-1);
 	    if (argvlen >= maxargvlen) {
 		maxargvlen = (t > maxargvlen) ? t*2 : maxargvlen*2;
 		argstr = realloc(argstr, maxargvlen);
@@ -197,18 +200,18 @@ int poptConfigFileToString(FILE *fp, char ** argstrp, /*@unused@*/ int flags)
 	*q++ = '\0';
 
 	/* find next non-space letter of value */
-	while (*q != '\0' && isspace(*q))
+	while (*q != '\0' && _isspaceptr(q))
 	    q++;
 	if (*q == '\0')
 	    continue;	/* XXX silently ignore missing value */
 
 	/* now, loop and strip all ending whitespace */
 	x = p + linelen;
-	while (isspace(*--x))
-	    *x = 0;	/* null out last char if space (including fgets() NL) */
+	while (_isspaceptr(--x))
+	    *x = '\0';	/* null out last char if space (including fgets() NL) */
 
 	/* rest of line accept */
-	t = x - p;
+	t = (size_t)(x - p);
 	argvlen += t + (sizeof("' --='")-1);
 	if (argvlen >= maxargvlen) {
 	    maxargvlen = (t > maxargvlen) ? t*2 : maxargvlen*2;

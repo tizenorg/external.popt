@@ -2,42 +2,68 @@
 
 AUTOMAKE_OPTIONS = 1.4 foreign
 
-EXTRA_DIST = autogen.sh CHANGES $(man_MANS) popt.spec \
+LINT =		splint
+MCCABE =	pmccabe
+
+EXTRA_DIST = config.rpath lookup3.c autogen.sh CHANGES $(man_MANS) \
+	m4/Makefile.in \
+	footer_no_timestamp.html libpopt.vers \
 	testit.sh test-poptrc \
-	po/*.in po/*.po po/popt.pot \
+	popt.xcodeproj/project.pbxproj \
 	popt.ps
 
-SUBDIRS = intl po
+SUBDIRS = po . auto
 
-INCLUDES = -I. -I$(top_srcdir)
+AM_CPPFLAGS = -I. -I$(top_srcdir)
 
-noinst_HEADERS = findme.h poptint.h system.h
+noinst_HEADERS = poptint.h system.h
 
-noinst_PROGRAMS = test1 test2 test3
+noinst_PROGRAMS = test1 test2 tdict # test3
 test1_SOURCES = test1.c
-test1_LDFLAGS = -all-static
-test1_LDADD = $(lib_LTLIBRARIES)
+test1_LDFLAGS = 
+test1_LDADD = $(usrlib_LTLIBRARIES)
 test2_SOURCES = test2.c
-test2_LDFLAGS = -all-static
-test2_LDADD = $(lib_LTLIBRARIES)
-test3_SOURCES = test3.c
-test3_LDFLAGS = -all-static
-test3_LDADD = $(lib_LTLIBRARIES)
+test2_LDFLAGS = 
+test2_LDADD = $(usrlib_LTLIBRARIES)
+#test3_SOURCES = test3.c
+#test3_LDFLAGS = 
+#test3_LDADD = $(usrlib_LTLIBRARIES)
+tdict_SOURCES = tdict.c
+tdict_LDFLAGS = 
+tdict_LDADD = $(usrlib_LTLIBRARIES)
 
 noinst_SCRIPTS = testit.sh
 
 TESTS_ENVIRONMENT = \
-test1="./test1"
+test1="$(top_builddir)/test1"
 
-TESTS = testit.sh
+TESTS = $(top_srcdir)/testit.sh
 
 include_HEADERS = popt.h
-lib_LTLIBRARIES = libpopt.la
-libpopt_la_SOURCES = popt.c findme.c poptparse.c poptconfig.c popthelp.c
+
+usrlibdir = $(libdir)
+usrlib_LTLIBRARIES = libpopt.la
+
+libpopt_la_SOURCES = popt.c poptparse.c poptconfig.c popthelp.c poptint.c
+libpopt_la_LDFLAGS = -no-undefined @LTLIBINTL@ @LTLIBICONV@
+
+pkgconfigdir = $(prefix)/lib/pkgconfig
+pkgconfig_DATA = popt.pc
+
+if HAVE_LD_VERSION_SCRIPT
+libpopt_la_LDFLAGS += -Wl,--version-script=$(top_srcdir)/libpopt.vers
+endif
 
 man_MANS = popt.3
 
-#BUILT_SOURCES = popt.lcd
+BUILT_SOURCES = popt.pc # popt.lcd
+
+distclean-local:
+	rm -rf .ccache
+
+.PHONY:	updatepo
+updatepo:
+	rsync -Lrtvz  translationproject.org::tp/latest/popt/  po
 
 popt.lcd: Makefile.am ${libpopt_la_SOURCES} ${include_HEADERS} ${noinst_HEADERS}
 	lclint -dump $@ ${libpopt_la_SOURCES}
@@ -46,31 +72,47 @@ popt.lcd: Makefile.am ${libpopt_la_SOURCES} ${include_HEADERS} ${noinst_HEADERS}
 sources:
 	@echo $(libpopt_la_SOURCES:%=popt/%)
 
-.PHONY: lclint
-lclint:
-	lclint ${DEFS} ${INCLUDES} test1.c ${libpopt_la_SOURCES}
+.PHONY: lint
+lint:
+	$(LINT) ${DEFS} ${INCLUDES} test1.c ${libpopt_la_SOURCES}
 
-CVSTAG = $(PACKAGE)-$(subst .,_,$(VERSION))
-
-.PHONY: archive
-archive: 
-	@echo "This is $(PACKAGE)-$(VERSION)."
-	@sleep 5
-	@cvs -Q tag -F $(CVSTAG) .
-	@rm -rf /tmp/$(PACKAGE)-$(VERSION) /tmp/$(PACKAGE)
-	@cd /tmp; cvs -Q -d $(CVSROOT) export -r$(CVSTAG) $(PACKAGE) || :
-	@mv /tmp/$(PACKAGE) /tmp/$(PACKAGE)-$(VERSION)
-	@cd /tmp/$(PACKAGE)-$(VERSION); ./autogen.sh ; make depend; make distclean
-	@cd /tmp/$(PACKAGE)-$(VERSION); ./autogen.sh --noconfigure
-	@cd /tmp; tar czSpf $(PACKAGE)-$(VERSION).tar.gz $(PACKAGE)-$(VERSION)
-	@rm -rf /tmp/$(PACKAGE)-$(VERSION)
-	@cp /tmp/$(PACKAGE)-$(VERSION).tar.gz .
-	@rm -f /tmp/$(PACKAGE)-$(VERSION).tar.gz 
-	@echo " "
-	@echo "The final archive is ./$(PACKAGE)-$(VERSION).tar.gz."
+.PHONY:	mccabe
+mccabe:
+	$(MCCABE) $(libpopt_la_SOURCES) | sort -n -r | head -n 10
 
 .PHONY: doxygen
 doxygen: Doxyfile
 	rm -rf doxygen
 	mkdir -p doxygen
 	doxygen
+
+.PHONY:	lcov-reset	# run lcov from scratch, always
+lcov-reset:
+	make lcov-run
+	make lcov-report
+
+.PHONY:	lcov		# run lcov from scratch if the dir is not there
+lcov:
+	make lcov-reset
+
+.PHONY:	lcov-run	# reset run coverage tests
+lcov-run:
+	@-rm -rf lcov
+	find . -name "*.gcda" -exec rm {} \;
+	make check
+
+.PHONY:	lcov-report	# generate report based on current coverage data
+lcov-report:
+	mkdir lcov
+	lcov --directory . --capture --output-file lcov/lcov.info
+	lcov -l lcov/lcov.info | grep -v "`cd $(top_srcdir) && pwd`" | cut -d: -f1 > lcov/remove
+	lcov -r lcov/lcov.info `cat lcov/remove` > lcov/lcov.cleaned.info
+	rm lcov/remove
+	mv lcov/lcov.cleaned.info lcov/lcov.info
+	genhtml -t "$(PACKAGE_STRING)" -o lcov lcov/lcov.info
+
+#.PHONY:	lcov-upload
+#lcov-upload: lcov
+#	rsync -rvz -e ssh --delete lcov/* ???
+
+ACLOCAL_AMFLAGS = -I m4

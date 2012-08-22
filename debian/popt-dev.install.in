@@ -1,5 +1,0 @@
-@PREFIX@/include/*
-@PREFIX@/lib/libpopt.a
-@PREFIX@/lib/libpopt.la
-@PREFIX@/share/man/*
-
