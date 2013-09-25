@@ -70,10 +70,13 @@ do
 	done;
 done
 
+# license
+mkdir -p %{buildroot}/usr/share/license
+cp COPYING %{buildroot}/usr/share/license/%{name}
+
 %post -p /sbin/ldconfig
 
 %postun -p /sbin/ldconfig
-
 
 %files
 %defattr(-,root,root,-)
@@ -82,7 +85,7 @@ done
 %{_datadir}/license/%{name}
 %{_sysconfdir}/popt.d
 /%{_lib}/libpopt.so.*
-
+/usr/share/license/%{name}
 
 %files devel
 %defattr(-,root,root,-)
