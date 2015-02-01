@@ -7,8 +7,10 @@ License:    MIT
 URL:        http://www.rpm5.org/
 Source0:    http://www.rpm5.org/files/%{name}/%{name}-%{version}.tar.gz
 Source1001: %{name}.manifest
+Patch1:     popt-pkgconfig-lib64.patch
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
+
 
 %description
 Popt is a C library for parsing command line parameters. Popt was
@@ -36,6 +38,9 @@ API documentation of the popt library, too.
 
 %prep
 %setup -q -n %{name}-%{version}
+%ifarch x86_64
+%patch1 -p1
+%endif
 
 %build
 cp %{SOURCE1001} .
