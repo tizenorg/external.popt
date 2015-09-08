@@ -1,0 +1,24 @@
+diff -urNp popt-1.16.orig/Makefile.am popt-1.16/Makefile.am
+--- popt-1.16.orig/Makefile.am	2012-11-02 18:45:02.000000000 +0900
++++ popt-1.16/Makefile.am	2014-06-18 21:47:58.052719970 +0900
+@@ -47,7 +47,7 @@ usrlib_LTLIBRARIES = libpopt.la
+ libpopt_la_SOURCES = popt.c poptparse.c poptconfig.c popthelp.c poptint.c
+ libpopt_la_LDFLAGS = -no-undefined @LTLIBINTL@ @LTLIBICONV@
+ 
+-pkgconfigdir = $(prefix)/lib/pkgconfig
++pkgconfigdir = $(prefix)/lib64/pkgconfig
+ pkgconfig_DATA = popt.pc
+ 
+ if HAVE_LD_VERSION_SCRIPT
+diff -urNp popt-1.16.orig/Makefile.in popt-1.16/Makefile.in
+--- popt-1.16.orig/Makefile.in	2012-11-02 18:45:02.000000000 +0900
++++ popt-1.16/Makefile.in	2014-06-18 21:48:29.420719373 +0900
+@@ -370,7 +370,7 @@ usrlib_LTLIBRARIES = libpopt.la
+ libpopt_la_SOURCES = popt.c poptparse.c poptconfig.c popthelp.c poptint.c
+ libpopt_la_LDFLAGS = -no-undefined @LTLIBINTL@ @LTLIBICONV@ \
+ 	$(am__append_1)
+-pkgconfigdir = $(prefix)/lib/pkgconfig
++pkgconfigdir = $(prefix)/lib64/pkgconfig
+ pkgconfig_DATA = popt.pc
+ man_MANS = popt.3
+ BUILT_SOURCES = popt.pc # popt.lcd

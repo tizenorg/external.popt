@@ -1,11 +1,13 @@
 Name:       popt
 Summary:    C library for parsing command line parameters
 Version:    1.16
-Release:    1
+Release:    3
 Group:      System/Libraries
 License:    MIT
 URL:        http://www.rpm5.org/
 Source0:    http://www.rpm5.org/files/%{name}/%{name}-%{version}.tar.gz
+Source1001: %{name}.manifest
+Patch1:     popt-pkgconfig-lib64.patch
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 
@@ -36,9 +38,12 @@ API documentation of the popt library, too.
 
 %prep
 %setup -q -n %{name}-%{version}
+%ifarch x86_64
+%patch1 -p1
+%endif
 
 %build
-
+cp %{SOURCE1001} .
 %configure --disable-static \
     --libdir=/%{_lib} \
     --disable-nls
@@ -59,6 +64,15 @@ popd
 # Multiple popt configurations are possible
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/popt.d
 
+mkdir -p $RPM_BUILD_ROOT%{_datadir}/license
+for keyword in LICENSE COPYING COPYRIGHT;
+do
+	for file in `find %{_builddir} -name $keyword`;
+	do
+		cat $file >> $RPM_BUILD_ROOT%{_datadir}/license/%{name};
+		echo "";
+	done;
+done
 
 %post -p /sbin/ldconfig
 
@@ -67,7 +81,9 @@ mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/popt.d
 
 %files
 %defattr(-,root,root,-)
+%manifest %{name}.manifest
 %doc COPYING
+%{_datadir}/license/%{name}
 %{_sysconfdir}/popt.d
 /%{_lib}/libpopt.so.*
 
